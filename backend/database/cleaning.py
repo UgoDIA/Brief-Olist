@@ -174,21 +174,21 @@ reviewsDf=reviewsTable()
 ###### Import vers BDD
 
 locationsDf.to_sql('locations',engine, if_exists='append',index= False)
-print("import locations terminé")
+
 categoriesDf.to_sql('categories',engine, if_exists='append',index= False)
-print("import categories terminé")
+
 sellersDf.to_sql('sellers',engine, if_exists='append',index= False)
-print("import sellers terminé")
+
 customersDf.to_sql('customers',engine, if_exists='append',index= False)
-print("import customers terminé")
+
 productsDf.to_sql('products',engine, if_exists='append',index= False)
-print("import products terminé")
+
 ordersDf.to_sql('orders',engine, if_exists='append',index= False)
-print("import orders terminé")
+
 ordersItemsDf.to_sql('order_items',engine, if_exists='append',index= False)
-print("import order_items terminé")
+
 reviewsDf.to_sql('reviews',engine, if_exists='append',index= False)
-print("import reviews terminé")
+
 paymentDf.to_sql('payments',engine, if_exists='append',index= False)
-print("import payments terminé")
+
 print("import total terminé")

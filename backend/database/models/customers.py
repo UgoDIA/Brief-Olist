@@ -11,7 +11,7 @@ from .orders import Orders
 class Customers(Base):
     __tablename__ = 'customers'
 
-    id       = Column(Integer, primary_key=True) 
+    id       = Column(String, primary_key=True) 
     
     orders = relationship(Orders, backref='customers')
     state  = Column(ForeignKey('locations.state'))

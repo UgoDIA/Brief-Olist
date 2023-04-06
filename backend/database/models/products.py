@@ -9,7 +9,7 @@ except:
 class Products(Base):
     __tablename__ = 'products'
 
-    id          = Column(Integer, primary_key=True)
+    id          = Column(String, primary_key=True)
     name_length = Column(Integer, nullable=False)
     description_length = Column(Integer, nullable=False)
     photos_qty         = Column(Integer, nullable=False)

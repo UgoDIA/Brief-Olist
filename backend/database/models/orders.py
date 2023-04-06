@@ -9,7 +9,7 @@ except:
 class Orders(Base):
     __tablename__ = 'orders'
 
-    id     = Column(Integer, primary_key=True)
+    id     = Column(String, primary_key=True)
     status = Column(String, nullable=False)
     
     approved_at  = Column(DateTime, nullable=False)

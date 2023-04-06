@@ -10,7 +10,7 @@ except:
 class Reviews(Base):
     __tablename__ = 'reviews'
     
-    id = Column(Integer, primary_key=True)
+    id = Column(String, primary_key=True)
     score = Column(Integer, nullable=False)
     comment_title = Column(String, nullable=False)
     comment_message = Column(String, nullable=False)

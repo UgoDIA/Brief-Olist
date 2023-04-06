@@ -20,5 +20,5 @@ class Orders(Base):
     purchase_timestamps      = Column(DateTime, nullable=False)
     
     customer   = mapped_column(ForeignKey('customers.id'))
-    location   = mapped_column(ForeignKey('locations.zip_code'))
+    state   = mapped_column(ForeignKey('locations.state'))
     

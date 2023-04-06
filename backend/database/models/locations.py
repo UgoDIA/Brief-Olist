@@ -9,6 +9,6 @@ except:
 class Locations(Base):
     __tablename__ = 'locations'
     
-    state     = Column(String, nullable=False)
+    state     = Column(String, primary_key=True)
 
 # setattr(Tasks, 'class', Column(String, default='rounded'))

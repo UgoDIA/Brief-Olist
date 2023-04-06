@@ -11,9 +11,9 @@ class Reviews(Base):
     __tablename__ = 'reviews'
     
     id = Column(String, primary_key=True)
-    score = Column(Integer, nullable=False)
-    comment_title = Column(String, nullable=False)
-    comment_message = Column(String, nullable=False)
+    score = Column(Integer)
+    comment_title = Column(String)
+    comment_message = Column(String)
     creation_date = Column(DateTime)
     answer_timestamp = Column(DateTime)
     

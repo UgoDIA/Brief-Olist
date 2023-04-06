@@ -10,9 +10,9 @@ class Products(Base):
     __tablename__ = 'products'
 
     id          = Column(String, primary_key=True)
-    name_length = Column(Integer, nullable=False)
-    description_length = Column(Integer, nullable=False)
-    photos_qty         = Column(Integer, nullable=False)
+    name_length = Column(Integer)
+    description_length = Column(Integer)
+    photos_qty         = Column(Integer)
     
-    categorie   = mapped_column(ForeignKey('categories.id'))
-    seller      = mapped_column(ForeignKey('sellers.id'))
+    category = mapped_column(ForeignKey('categories.id'))
+    seller   = mapped_column(ForeignKey('sellers.id'))

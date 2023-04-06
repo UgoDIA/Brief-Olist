@@ -12,13 +12,12 @@ class Orders(Base):
     id     = Column(String, primary_key=True)
     status = Column(String, nullable=False)
     
-    approved_at  = Column(DateTime, nullable=False)
-    delivered_carrier_date   = Column(DateTime, nullable=False)
-    shipping_limit_date      = Column(DateTime, nullable=False)
-    deliverred_customer_date = Column(DateTime, nullable=False)
-    estimated_delivery_date  = Column(DateTime, nullable=False)
-    purchase_timestamps      = Column(DateTime, nullable=False)
+    approved_at  = Column(DateTime)
+    delivered_carrier_date   = Column(DateTime)
+    shipping_limit_date      = Column(DateTime)
+    delivered_customer_date = Column(DateTime)
+    estimated_delivery_date  = Column(DateTime)
+    purchase_timestamps      = Column(DateTime)
     
     customer   = mapped_column(ForeignKey('customers.id'))
-    state   = mapped_column(ForeignKey('locations.state'))
     

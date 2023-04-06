@@ -15,7 +15,7 @@ class OrderItems(Base):
     product = mapped_column(ForeignKey('products.id'), primary_key=True)
 
     price  = Column(Float, nullable=False)
-    freigh = Column(Float, nullable=False, default=0.00)
+    freight = Column(Float, nullable=False, default=0.00)
     qty    = Column(Integer)
     
 

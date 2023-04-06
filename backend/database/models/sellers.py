@@ -10,5 +10,6 @@ class Sellers(Base):
     __tablename__ = 'sellers'
 
     id       = Column(Integer, primary_key=True) 
+    name     = Column(String)
     location = mapped_column(ForeignKey('locations.state'))
     

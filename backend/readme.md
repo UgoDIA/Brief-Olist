@@ -14,6 +14,7 @@ lancer l'environement:
       - bin/Activate.ps1
 
 ### Installer les dépendance python via pip
+  pip install -r requirements.txt
     - sqlalchemy
     - psycopg2
     - hug

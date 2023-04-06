@@ -17,6 +17,7 @@ lancer l'environement:
     - sqlalchemy
     - psycopg2
     - hug
+    - pyjwt
 
 Une fois l'environement créer, dans le fichier "pyvenv.cfg" rajouter:
 
@@ -25,4 +26,6 @@ Une fois l'environement créer, dans le fichier "pyvenv.cfg" rajouter:
     - user     = database user
     - password = database password
     - database = database name
+    - secretkey = pour le token
+    - salt      = pourle hashage
 

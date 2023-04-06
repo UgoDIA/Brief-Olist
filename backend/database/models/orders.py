@@ -1,6 +1,8 @@
 from sqlalchemy.orm import mapped_column, relationship
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 
+from .order_items import OrderItems
+
 try:
     from database import Base
 except:
@@ -19,5 +21,5 @@ class Orders(Base):
     estimated_delivery_date  = Column(DateTime)
     purchase_timestamps      = Column(DateTime)
     
-    customer   = mapped_column(ForeignKey('customers.id'))
-    
+    customer = mapped_column(ForeignKey('customers.id'))
+    items    = relationship(OrderItems, backref='orders')

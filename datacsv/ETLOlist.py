@@ -55,23 +55,22 @@ engine = create_engine('postgresql://postgres:0000@localhost:5432/testolist')
 
 df1=pd.read_csv('olist_products_dataset.csv') #32951      products
 
-
-df1.dropna(inplace=True)        # --> 32340 
+df1['product_category_name']=df1['product_category_name'].fillna('unknown')
+# df1.dropna(inplace=True)        # --> 32340 
 df3=df1.copy()                                         #categories
 # df1.info()
 df2=pd.read_csv('olist_order_items_dataset.csv') #112650       item order
 # df2.info()
 
-df3.reset_index(drop=True,inplace=True)
+# df3.reset_index(drop=True,inplace=True)
 df3.drop(["product_id","product_name_lenght","product_description_lenght","product_photos_qty","product_weight_g","product_length_cm","product_height_cm","product_width_cm"], inplace=True, axis=1)
+df3.drop_duplicates(subset=["product_category_name"],  keep='first',inplace=True)
+df3.reset_index(inplace=True,drop=True)
 df3['category_id'] = df3.index
-# print(df3)
+df3.to_csv('cat.csv', index=False)
 
 ## Merge des 2 df sur 'product_id' puis 3eme df sur category name
 merged_df = pd.merge(df1, df2[['product_id', 'seller_id']], on='product_id', how='left')
-
-# merged_df = pd.merge(merged_df, df3[['category_id', 'product_category_name']], on='product_category_name', how='left')
-
 
 # merged_df.rename(columns={"product_id":'id',"product_category_name":'name',"product_name_lenght":'name_length',"product_description_lenght":'description_length',"product_photos_qty":"photos_qty"}, inplace = True)
 merged_df.drop(["product_weight_g","product_length_cm","product_height_cm","product_width_cm"], inplace=True, axis=1)
@@ -81,7 +80,7 @@ merged_df = pd.merge(merged_df, df3[['category_id', 'product_category_name']], o
 merged_df.drop_duplicates(subset=["product_id"],  keep='first',inplace=True)
 merged_df.drop(["product_category_name"], inplace=True, axis=1)
 merged_df.rename(columns={"product_id":'id',"product_name_lenght":'name_length',"product_description_lenght":'description_length',"product_photos_qty":"photos_qty"}, inplace = True)
-
+merged_df.to_csv('modified_file.csv', index=False)
 
 
 

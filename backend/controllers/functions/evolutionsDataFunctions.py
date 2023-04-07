@@ -1,8 +1,11 @@
 from sqlalchemy import text, func, desc
 from database.database import session
-from database.models.order_items import OrderItems
-from database.models.customers import Customers
-from database.models.orders import Orders
+
+from database.models import OrderItems
+from database.models import Customers
+from database.models import Orders
+
+# from database.models.products import Products
 
 def getDataTOP10product(region, annee):
 

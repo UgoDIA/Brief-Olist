@@ -1,8 +1,8 @@
 from database.database import session
 from database.models import Customers, OrderItems, Orders
 
-from sqlalchemy import func, desc
-
+from sqlalchemy import func, desc, types
+ 
 class map:
     def getData():
         datas =  session.query(Customers.state, func.sum(OrderItems.price * OrderItems.qty)).join(Orders, Orders.customer == Customers.id).join(OrderItems, OrderItems.order == Orders.id).group_by(Customers.state).all()
@@ -23,17 +23,23 @@ class map:
         return datasList
 class evolutions:
     def getDatas(region=None, annee=None):
-        def getDataTOP10product(region, annee):
+        def getTOP10product(region, annee):
             # Si pas de régions et pas d'années séléctionné
             if region == None and annee == None:
-                datas = session.query(OrderItems.product, func.sum(OrderItems.qty).label("test")).group_by(OrderItems.product).order_by(desc("test")).limit(10)
+                datas = session.query(OrderItems.product, func.sum(OrderItems.qty).label("test"))\
+                    .group_by(OrderItems.product)\
+                    .order_by(desc("test")).limit(10)
                 # renvoie => id_produit et volume de ventes
                 return datas
 
             # Si seulement région séléctionné
             elif annee == None:
                 # Ne fonctionnait pas, cause => order_by , pq => import les class dans les modele qd fk
-                datas = session.query(OrderItems.product,Customers.state, func.sum(OrderItems.qty).label('qtySum')).join(Orders, Orders.customer == Customers.id).join(OrderItems, OrderItems.order == Orders.id).where(Customers.state == region).group_by(OrderItems.product, Customers.state).order_by(desc('qtySum')).limit(10)
+                datas = session.query(OrderItems.product,Customers.state, func.sum(OrderItems.qty).label('qtySum'))\
+                    .join(Orders, Orders.customer == Customers.id).join(OrderItems, OrderItems.order == Orders.id)\
+                    .where(Customers.state == region)\
+                    .group_by(OrderItems.product, Customers.state)\
+                    .order_by(desc('qtySum')).limit(10)
                 
                 # sql = text(
                 #     "SELECT order_items.product, sum(order_items.qty) AS qtySum \
@@ -58,17 +64,39 @@ class evolutions:
         def getTOP10states(annee):
             # Si pas d'années séléctionné
             if annee == None:
-                datas = session.query(Customers.state, func.sum(OrderItems.price * OrderItems.qty).label('brl')).join(Orders, Orders.customer == Customers.id).join(OrderItems, OrderItems.order == Orders.id).group_by(Customers.state).order_by(desc('brl')).limit(10)
+                datas = session.query(Customers.state, func.sum(OrderItems.price * OrderItems.qty).label('brl'))\
+                    .join(Orders, Orders.customer == Customers.id)\
+                    .join(OrderItems, OrderItems.order == Orders.id)\
+                    .group_by(Customers.state).order_by(desc('brl')).limit(10)
                 return datas
             else:
                 return 'todo'
         
+        def getEvolutionsRegionCA(region, annee):
+            if region == None and annee == None:
+                datas = session.query(func.date_trunc('month',Orders.delivered_customer_date).label("test"), func.sum(OrderItems.price * OrderItems.qty))\
+                    .join(OrderItems, OrderItems.order == Orders.id)\
+                    .group_by("test")\
+                    .order_by(desc('test'))
+                return datas
+            
+            elif annee == None:
+                datas = session.query(Customers.state,func.date_trunc('month',Orders.delivered_customer_date).label("test"), func.sum(OrderItems.price * OrderItems.qty))\
+                    .join(Orders, Orders.customer == Customers.id)\
+                    .join(OrderItems, OrderItems.order == Orders.id)\
+                    .group_by(Customers.state, "test").where(Customers.state == region)\
+                    .order_by(desc('test'))
+                return datas
+            
+            elif region == None:
+                return 'todo'
+
         dicoDatas = {}
 
-        datas = getDataTOP10product(region, annee)
-        dicoDatas['TOP10product'] = datas
+        dicoDatas['TOP10product'] = getTOP10product(region, annee)
 
-        datas = getTOP10states(annee)
-        dicoDatas['TOP10states'] = datas
+        dicoDatas['TOP10states'] = getTOP10states(annee)
+
+        dicoDatas['evolutionsRegionsCA'] = getEvolutionsRegionCA(region, annee)
 
         return dicoDatas

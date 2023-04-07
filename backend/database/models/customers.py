@@ -1,4 +1,3 @@
-from sqlalchemy.orm import mapped_column, relationship
 from sqlalchemy import Column, Integer, String, ForeignKey
 
 try:
@@ -13,5 +12,4 @@ class Customers(Base):
 
     id       = Column(String, primary_key=True) 
     
-    orders = relationship(Orders, backref='customers')
     state  = Column(ForeignKey('locations.state'))

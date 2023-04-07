@@ -11,5 +11,6 @@ class Sellers(Base):
 
     id       = Column(String, primary_key=True) 
     name     = Column(String)
-    state = mapped_column(ForeignKey('locations.state'))
+    state = Column(ForeignKey('locations.state'))
+
     

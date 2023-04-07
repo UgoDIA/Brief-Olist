@@ -1,4 +1,3 @@
-from sqlalchemy.orm import mapped_column, relationship
 from sqlalchemy import Column, Integer, String, ForeignKey, Float
 
 try:
@@ -14,5 +13,5 @@ class Products(Base):
     description_length = Column(Integer)
     photos_qty         = Column(Integer)
     
-    category = mapped_column(ForeignKey('categories.id'))
-    seller   = mapped_column(ForeignKey('sellers.id'))
+    category = Column(ForeignKey('categories.id'))
+    seller   = Column(ForeignKey('sellers.id'))

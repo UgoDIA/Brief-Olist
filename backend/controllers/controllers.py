@@ -42,6 +42,8 @@ class evolutions:
                         pattern = r'(\d{4}-\d{2})'
                         match = re.search(pattern, str(subelt))
                         labels.append(match.group(1))
+                    elif subelt == None:
+                        labels.append(subelt)
                     elif isinstance(subelt, int) or isinstance(subelt, float):
                         values.append(round(subelt, 2))
             return [labels, values]
@@ -95,22 +97,38 @@ class evolutions:
             else:
                 return 'todo'
 
-        # ATTENTION Ici les valeurs contenu qui n'ont pas de date (null) ne sont pas envoyé
-        # à cause de 'isinstance(date)' dans le formateurChartJS
-        def getEvolutionsRegionCA(region, annee):
+        def getEvolutionsCA(region, annee):
             if region == None and annee == None:
-                datas = session.query(func.date_trunc('month', Orders.delivered_customer_date).label("test"), func.sum(OrderItems.price * OrderItems.qty))\
+                datas = session.query(func.date_trunc('month', Orders.approved_at).label("test"), func.sum(OrderItems.price * OrderItems.qty))\
                     .join(OrderItems, OrderItems.order == Orders.id)\
                     .group_by("test")\
-                    .order_by(desc('test'))
+                    .order_by('test')
                 return datas
 
             elif annee == None:
-                datas = session.query(Customers.state, func.date_trunc('month', Orders.delivered_customer_date).label("test"), func.sum(OrderItems.price * OrderItems.qty))\
+                datas = session.query(Customers.state, func.date_trunc('month', Orders.approved_at).label("test"), func.sum(OrderItems.price * OrderItems.qty))\
                     .join(Orders, Orders.customer == Customers.id)\
                     .join(OrderItems, OrderItems.order == Orders.id)\
                     .group_by(Customers.state, "test").where(Customers.state == region)\
-                    .order_by(desc('test'))
+                    .order_by('test')
+                return datas
+
+            elif region == None:
+                return 'todo'
+
+        def getEvolutionsVolume(region, annee):
+            if region == None and annee == None:
+                datas = session.query(func.date_trunc('month', Orders.approved_at).label("month"), func.count(Orders.id))\
+                    .group_by("month")\
+                    .order_by('month')
+                return datas
+
+            elif annee == None:
+                datas = session.query(func.date_trunc('month', Orders.approved_at).label("month"), func.count(Orders.id))\
+                    .join(Customers, Customers.id == Orders.customer)\
+                    .where(Customers.state == region)\
+                    .group_by("month")\
+                    .order_by('month')
                 return datas
 
             elif region == None:
@@ -123,7 +141,10 @@ class evolutions:
 
         dicoDatas['TOP10states'] = chartJSFormater(getTOP10states(annee), True)
 
-        dicoDatas['evolutionsRegionsCA'] = chartJSFormater(
-            getEvolutionsRegionCA(region, annee))
+        dicoDatas['evolutionsCA'] = chartJSFormater(
+            getEvolutionsCA(region, annee))
+
+        dicoDatas['EvolutionsVolume'] = chartJSFormater(
+            getEvolutionsVolume(region, annee))
 
         return dicoDatas

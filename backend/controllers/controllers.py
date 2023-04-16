@@ -29,12 +29,14 @@ class map:
 
 class evolutions:
     def getDatas(region=None, annee=None):
-        def chartJSFormater(datas):
+        def chartJSFormater(datas, region=False):
+            regionList = ["AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS",
+                          "MT", "PA", "PB", "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC", "SE", "SP", "TO"]
             labels = []
             values = []
             for elt in datas:
                 for subelt in elt:
-                    if isinstance(subelt, str):
+                    if isinstance(subelt, str) and region == True or isinstance(subelt, str) and subelt not in regionList:
                         labels.append(subelt)
                     elif isinstance(subelt, datetime.datetime):
                         pattern = r'(\d{4}-\d{2})'
@@ -119,7 +121,7 @@ class evolutions:
         dicoDatas['TOP10product'] = chartJSFormater(
             getTOP10product(region, annee))
 
-        dicoDatas['TOP10states'] = chartJSFormater(getTOP10states(annee))
+        dicoDatas['TOP10states'] = chartJSFormater(getTOP10states(annee), True)
 
         dicoDatas['evolutionsRegionsCA'] = chartJSFormater(
             getEvolutionsRegionCA(region, annee))

@@ -4,7 +4,7 @@ import re
 
 import datetime
 
-from sqlalchemy import func, desc, types
+from sqlalchemy import func, desc, types, text
 
 
 class map:
@@ -148,3 +148,35 @@ class evolutions:
             getEvolutionsVolume(region, annee))
 
         return dicoDatas
+
+
+class annonce:
+    def getDatas():
+        # QUERY
+        sql = text('''SELECT CONCAT((description_length/1000)*1000,' - ' ,(description_length/1000)*1000+1000) as dl_range, SUM(order_items.qty)
+        FROM products
+        JOIN order_items ON products.id = order_items.product
+        group by dl_range
+        order by dl_range''')
+        datas = session.execute(sql)
+
+        # FORMAT for chartjs
+        labels = []
+        values = []
+        for elt in datas:
+            i = 1
+            for subelt in elt:
+                if i/2 == int(i/2):
+                    values.append(subelt)
+                else:
+                    if subelt == ' - ':
+                        labels.append('Non renseigné')
+                    else:
+                        labels.append(subelt)
+                i += 1
+        labels.append(labels[0])
+        labels.pop(0)
+        values.append(values[0])
+        values.pop(0)
+
+        return {'description': {'labels': labels, 'values': values}}

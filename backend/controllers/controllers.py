@@ -154,11 +154,18 @@ class annonce:
     def getDatas():
         def graphDescription():
             # QUERY
-            sql = text('''SELECT CONCAT((description_length/1000)*1000,' - ' ,(description_length/1000)*1000+1000) as dl_range, SUM(order_items.qty)
-            FROM products
-            JOIN order_items ON products.id = order_items.product
-            group by dl_range
-            order by dl_range''')
+            sql = text('''SELECT
+                                CASE WHEN products.description_length <= 1000 THEN 'a. 0 - 1000'
+                                        WHEN products.description_length <= 2000 THEN 'b. 1001 - 2000'
+                                        WHEN products.description_length <= 3000 THEN 'c. 2001 - 3000'
+                                        WHEN products.description_length <= 4000 THEN 'd. 3001 - 4000'
+                                        WHEN products.description_length > 4000 THEN 'e. 4001+'
+                                        ELSE 'Non renseigné' END AS description,
+                                SUM(order_items.qty) AS ventes
+                            FROM products
+                            JOIN order_items ON products.id = order_items.product
+                            group by description
+                            order by description''')
             datas = session.execute(sql)
 
             # FORMAT for chartjs
@@ -175,10 +182,6 @@ class annonce:
                         else:
                             labels.append(subelt)
                     i += 1
-            labels.append(labels[0])
-            labels.pop(0)
-            values.append(values[0])
-            values.pop(0)
 
             return {'labels': labels, 'values': values}
 

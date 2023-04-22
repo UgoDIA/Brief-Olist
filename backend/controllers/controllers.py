@@ -152,31 +152,68 @@ class evolutions:
 
 class annonce:
     def getDatas():
-        # QUERY
-        sql = text('''SELECT CONCAT((description_length/1000)*1000,' - ' ,(description_length/1000)*1000+1000) as dl_range, SUM(order_items.qty)
-        FROM products
-        JOIN order_items ON products.id = order_items.product
-        group by dl_range
-        order by dl_range''')
-        datas = session.execute(sql)
+        def graphDescription():
+            # QUERY
+            sql = text('''SELECT CONCAT((description_length/1000)*1000,' - ' ,(description_length/1000)*1000+1000) as dl_range, SUM(order_items.qty)
+            FROM products
+            JOIN order_items ON products.id = order_items.product
+            group by dl_range
+            order by dl_range''')
+            datas = session.execute(sql)
 
-        # FORMAT for chartjs
-        labels = []
-        values = []
-        for elt in datas:
-            i = 1
-            for subelt in elt:
-                if i/2 == int(i/2):
-                    values.append(subelt)
-                else:
-                    if subelt == ' - ':
-                        labels.append('Non renseigné')
+            # FORMAT for chartjs
+            labels = []
+            values = []
+            for elt in datas:
+                i = 1
+                for subelt in elt:
+                    if i/2 == int(i/2):
+                        values.append(subelt)
+                    else:
+                        if subelt == ' - ':
+                            labels.append('Non renseigné')
+                        else:
+                            labels.append(subelt)
+                    i += 1
+            labels.append(labels[0])
+            labels.pop(0)
+            values.append(values[0])
+            values.pop(0)
+
+            return {'labels': labels, 'values': values}
+
+        def graphPhotos():
+            # Fléxibiliser => nb de colonnes selon select distinct
+            # QUERY
+            sql = text('''SELECT
+                                CASE WHEN products.photos_qty <= 4 THEN 'a. 0 - 4'
+                                        WHEN products.photos_qty <= 8 THEN 'b. 5 - 8'
+                                        WHEN products.photos_qty <= 12 THEN 'c. 9 - 12'
+                                        WHEN products.photos_qty <= 16 THEN 'd. 13 - 16'
+                                        WHEN products.photos_qty <= 20 THEN 'e. 17 - 20'
+                                        ELSE 'Non renseigné' END AS photos_quantity,
+                                SUM(order_items.qty) AS ventes
+                            FROM products
+                            JOIN order_items ON products.id = order_items.product
+                            group by photos_quantity
+                            order by photos_quantity''')
+            datas = session.execute(sql)
+            labels = []
+            values = []
+
+            for elt in datas:
+                i = 1
+                for subelt in elt:
+                    if i/2 == int(i/2):
+                        values.append(subelt)
                     else:
                         labels.append(subelt)
-                i += 1
-        labels.append(labels[0])
-        labels.pop(0)
-        values.append(values[0])
-        values.pop(0)
+                    i += 1
 
-        return {'description': {'labels': labels, 'values': values}}
+            return {'labels': labels, 'values': values}
+
+        dicoDatas = {}
+        dicoDatas['description'] = graphDescription()
+        dicoDatas['photos'] = graphPhotos()
+
+        return dicoDatas

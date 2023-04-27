@@ -151,21 +151,39 @@ class evolutions:
 
 
 class annonce:
-    def getDatas():
+    def getDatas(region=None):
         def graphDescription():
             # QUERY
-            sql = text('''SELECT
-                                CASE WHEN products.description_length <= 1000 THEN 'a. 0 - 1000'
-                                        WHEN products.description_length <= 2000 THEN 'b. 1001 - 2000'
-                                        WHEN products.description_length <= 3000 THEN 'c. 2001 - 3000'
-                                        WHEN products.description_length <= 4000 THEN 'd. 3001 - 4000'
-                                        WHEN products.description_length > 4000 THEN 'e. 4001+'
-                                        ELSE 'Non renseigné' END AS description,
-                                SUM(order_items.qty) AS ventes
-                            FROM products
-                            JOIN order_items ON products.id = order_items.product
-                            group by description
-                            order by description''')
+            if region == None:
+                sql = text('''SELECT
+                                    CASE WHEN products.description_length <= 1000 THEN 'a. 0 - 1000'
+                                            WHEN products.description_length <= 2000 THEN 'b. 1001 - 2000'
+                                            WHEN products.description_length <= 3000 THEN 'c. 2001 - 3000'
+                                            WHEN products.description_length <= 4000 THEN 'd. 3001 - 4000'
+                                            WHEN products.description_length > 4000 THEN 'e. 4001+'
+                                            ELSE 'Non renseigné' END AS description,
+                                    SUM(order_items.qty) AS ventes
+                                FROM products
+                                JOIN order_items ON products.id = order_items.product
+                                group by description
+                                order by description''')
+            else:
+                sql = text(f'''SELECT
+                                    CASE WHEN products.description_length <= 1000 THEN 'a. 0 - 1000'
+                                            WHEN products.description_length <= 2000 THEN 'b. 1001 - 2000'
+                                            WHEN products.description_length <= 3000 THEN 'c. 2001 - 3000'
+                                            WHEN products.description_length <= 4000 THEN 'd. 3001 - 4000'
+                                            WHEN products.description_length > 4000 THEN 'e. 4001+'
+                                            ELSE 'Non renseigné' END AS description,
+                                    SUM(order_items.qty) AS ventes
+                                FROM products
+                                JOIN order_items ON products.id = order_items.product
+                                JOIN orders ON orders.id = order_items.order
+                                JOIN customers ON customers.id = orders.customer
+                                JOIN locations ON locations.state = customers.state
+                                WHERE locations.state = '{region}'
+                                group by description, locations.state
+                                order by description''')
             datas = session.execute(sql)
 
             # FORMAT for chartjs
@@ -188,18 +206,38 @@ class annonce:
         def graphPhotos():
             # Fléxibiliser => nb de colonnes selon select distinct
             # QUERY
-            sql = text('''SELECT
-                                CASE WHEN products.photos_qty <= 4 THEN 'a. 0 - 4'
-                                        WHEN products.photos_qty <= 8 THEN 'b. 5 - 8'
-                                        WHEN products.photos_qty <= 12 THEN 'c. 9 - 12'
-                                        WHEN products.photos_qty <= 16 THEN 'd. 13 - 16'
-                                        WHEN products.photos_qty <= 20 THEN 'e. 17 - 20'
-                                        ELSE 'Non renseigné' END AS photos_quantity,
-                                SUM(order_items.qty) AS ventes
-                            FROM products
-                            JOIN order_items ON products.id = order_items.product
-                            group by photos_quantity
-                            order by photos_quantity''')
+            if region == None:
+                sql = text('''SELECT
+                                    CASE WHEN products.photos_qty <= 4 THEN 'a. 0 - 4'
+                                            WHEN products.photos_qty <= 8 THEN 'b. 5 - 8'
+                                            WHEN products.photos_qty <= 12 THEN 'c. 9 - 12'
+                                            WHEN products.photos_qty <= 16 THEN 'd. 13 - 16'
+                                            WHEN products.photos_qty <= 20 THEN 'e. 17 - 20'
+                                            WHEN products.photos_qty > 20 THEN 'f. 20+'
+                                            ELSE 'Non renseigné' END AS photos_quantity,
+                                    SUM(order_items.qty) AS ventes
+                                FROM products
+                                JOIN order_items ON products.id = order_items.product
+                                group by photos_quantity
+                                order by photos_quantity''')
+            else:
+                sql = text(f'''SELECT
+                                    CASE WHEN products.photos_qty <= 4 THEN 'a. 0 - 4'
+                                            WHEN products.photos_qty <= 8 THEN 'b. 5 - 8'
+                                            WHEN products.photos_qty <= 12 THEN 'c. 9 - 12'
+                                            WHEN products.photos_qty <= 16 THEN 'd. 13 - 16'
+                                            WHEN products.photos_qty <= 20 THEN 'e. 17 - 20'
+                                            WHEN products.photos_qty > 20 THEN 'f. 20+'
+                                            ELSE 'Non renseigné' END AS photos_quantity,
+                                    SUM(order_items.qty) AS ventes
+                                FROM products
+                                JOIN order_items ON products.id = order_items.product
+                                JOIN orders ON orders.id = order_items.order
+                                JOIN customers ON customers.id = orders.customer
+                                JOIN locations ON locations.state = customers.state
+                                WHERE locations.state = '{region}'
+                                group by photos_quantity, locations.state
+                                order by photos_quantity''')
             datas = session.execute(sql)
             labels = []
             values = []

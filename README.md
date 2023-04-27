@@ -24,4 +24,11 @@ Votre analyse marketing devra répondre aux questions suivantes:
 ​
 
 Il sera aussi demandé de mettre à disposition une application simple de mise à jour des données (avec API) pour permettre de corriger/modifier simplement certaines infos
+
 <!--  Test update -->
+
+## Lancer ./start
+
+```sh
+& .\start.bat
+```

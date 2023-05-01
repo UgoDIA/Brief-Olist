@@ -4,7 +4,7 @@ import re
 
 import datetime
 
-from sqlalchemy import func, desc, types, text
+from sqlalchemy import func, desc, types, text, extract
 
 
 class map:
@@ -49,18 +49,21 @@ class evolutions:
             return [labels, values]
 
         def getTOP10product(region, annee):
-            print(region, annee)
+            if(region == 'undefined'):
+                region = None
+            if(annee == 'undefined'):
+                annee = None
+
             # Si pas de régions et pas d'années séléctionné
-            if region == None and annee == 'undefined' or annee == None:
+            if region == None and annee == 'undefined':
                 datas = session.query(OrderItems.product, func.sum(OrderItems.qty).label("test"))\
                     .group_by(OrderItems.product)\
                     .order_by(desc("test")).limit(10)
                 # renvoie => id_produit et volume de ventes
-                print('okokok')
                 return datas
 
             # Si seulement région séléctionné
-            elif annee == None or annee == 'undefined':
+            elif annee == None:
                 # Ne fonctionnait pas, cause => order_by , pq => import les class dans les modele qd fk
                 datas = session.query(OrderItems.product, Customers.state, func.sum(OrderItems.qty).label('qtySum'))\
                     .join(Orders, Orders.customer == Customers.id).join(OrderItems, OrderItems.order == Orders.id)\
@@ -82,26 +85,40 @@ class evolutions:
 
             # Si seulement annee séléctionné
             elif region == None:
-                return 'todo'
+                datas = session.query(OrderItems.product, Customers.state, func.sum(OrderItems.qty).label('qtySum'))\
+                    .join(Orders, Orders.customer == Customers.id).join(OrderItems, OrderItems.order == Orders.id)\
+                    .where(extract('year', Orders.approved_at) == annee)\
+                    .group_by(OrderItems.product, Customers.state)\
+                    .order_by(desc('qtySum')).limit(10)
+                return datas
 
             # Régions et année séléctionné
             else:
-                return 'todo'
+                datas = session.query(OrderItems.product, Customers.state, func.sum(OrderItems.qty).label('qtySum'))\
+                    .join(Orders, Orders.customer == Customers.id).join(OrderItems, OrderItems.order == Orders.id)\
+                    .where(Customers.state == region).where(extract('year', Orders.approved_at) == annee)\
+                    .group_by(OrderItems.product, Customers.state)\
+                    .order_by(desc('qtySum')).limit(10)
+                return datas
 
         def getTOP10states(annee):
 
             # Si pas d'années séléctionné
-            if annee == None or annee == 'undefined':
+            if  annee == None or annee == 'undefined':
                 datas = session.query(Customers.state, func.sum(OrderItems.price * OrderItems.qty).label('brl'))\
                     .join(Orders, Orders.customer == Customers.id)\
                     .join(OrderItems, OrderItems.order == Orders.id)\
                     .group_by(Customers.state).order_by(desc('brl')).limit(10)
                 return datas
             else:
-                return 'todo'
+                datas = session.query(Customers.state, func.sum(OrderItems.price * OrderItems.qty).label('brl'))\
+                    .join(Orders, Orders.customer == Customers.id)\
+                    .join(OrderItems, OrderItems.order == Orders.id).where(extract('year', Orders.approved_at) == annee)\
+                    .group_by(Customers.state).order_by(desc('brl')).limit(10)
+                return datas
 
         def getEvolutionsCA(region, annee):
-            if region == None and annee == 'undefined':
+            if region == None or region == 'undefined' and annee == 'undefined':
                 datas = session.query(func.date_trunc('month', Orders.approved_at).label("test"), func.sum(OrderItems.price * OrderItems.qty))\
                     .join(OrderItems, OrderItems.order == Orders.id)\
                     .group_by("test")\
@@ -118,37 +135,54 @@ class evolutions:
 
             elif region == None:
                 return 'todo'
+            
+            datas = session.query(Customers.state, func.date_trunc('month', Orders.approved_at).label("test"), func.sum(OrderItems.price * OrderItems.qty))\
+                    .join(Orders, Orders.customer == Customers.id)\
+                    .join(OrderItems, OrderItems.order == Orders.id)\
+                    .group_by(Customers.state, "test").where(extract('year', Orders.approved_at) == annee).where(Customers.state == region)\
+                    .order_by('test')
+            return datas
 
         def getEvolutionsVolume(region, annee):
-            if region == None and annee == 'undefined':
+            if region == None or region == 'undefined' and annee == 'undefined':
                 datas = session.query(func.date_trunc('month', Orders.approved_at).label("month"), func.count(Orders.id))\
                     .group_by("month")\
                     .order_by('month')
                 return datas
 
-            elif annee == None:
+            elif annee == None or annee == 'undefined':
                 datas = session.query(func.date_trunc('month', Orders.approved_at).label("month"), func.count(Orders.id))\
                     .join(Customers, Customers.id == Orders.customer)\
                     .where(Customers.state == region)\
                     .group_by("month")\
-                    .order_by('month')
+                    .order_by('month')                
                 return datas
 
             elif region == None:
                 return 'todo'
 
+            datas = session.query(func.date_trunc('month', Orders.approved_at).label("month"), func.count(Orders.id))\
+                    .join(Customers, Customers.id == Orders.customer)\
+                    .where(Customers.state == region).where(extract('year', Orders.approved_at) == annee)\
+                    .group_by("month")\
+                    .order_by('month')   
+            
+            return datas
         dicoDatas = {}
 
-        dicoDatas['TOP10product'] = chartJSFormater(
-            getTOP10product(region, annee))
+        if(region != 'undefined'):
+            region = region[3:].upper()
+        
+        dicoDatas['TOP10product'] = chartJSFormater(getTOP10product(region, annee))
 
         dicoDatas['TOP10states'] = chartJSFormater(getTOP10states(annee), True)
 
-        dicoDatas['evolutionsCA'] = chartJSFormater(
-            getEvolutionsCA(region, annee))
+        print(getEvolutionsCA(region, annee))
+        dicoDatas['evolutionsCA'] = chartJSFormater(getEvolutionsCA(region, annee))
 
-        dicoDatas['EvolutionsVolume'] = chartJSFormater(
-            getEvolutionsVolume(region, annee))
+
+        print(getEvolutionsVolume(region, annee))
+        dicoDatas['EvolutionsVolume'] = chartJSFormater(getEvolutionsVolume(region, annee))
         
         return dicoDatas
 
@@ -261,3 +295,19 @@ class annonce:
         dicoDatas['photos'] = graphPhotos()
 
         return dicoDatas
+
+from sqlalchemy import func
+
+class data: 
+    def MinMaxYear():
+        # define year of interest
+        year = 2016
+        query = text(f"""
+                        SELECT MIN(orders.approved_at) AS start_date, MAX(orders.approved_at) AS end_date
+                        FROM orders;
+                    """)
+        (start_date, end_date) = session.execute(query).fetchone()
+        years = [year for year in range(start_date.year, end_date.year + 1)]
+        return years
+
+data.MinMaxYear()

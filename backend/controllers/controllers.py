@@ -49,16 +49,18 @@ class evolutions:
             return [labels, values]
 
         def getTOP10product(region, annee):
+            print(region, annee)
             # Si pas de régions et pas d'années séléctionné
-            if region == None and annee == None:
+            if region == None and annee == 'undefined' or annee == None:
                 datas = session.query(OrderItems.product, func.sum(OrderItems.qty).label("test"))\
                     .group_by(OrderItems.product)\
                     .order_by(desc("test")).limit(10)
                 # renvoie => id_produit et volume de ventes
+                print('okokok')
                 return datas
 
             # Si seulement région séléctionné
-            elif annee == None:
+            elif annee == None or annee == 'undefined':
                 # Ne fonctionnait pas, cause => order_by , pq => import les class dans les modele qd fk
                 datas = session.query(OrderItems.product, Customers.state, func.sum(OrderItems.qty).label('qtySum'))\
                     .join(Orders, Orders.customer == Customers.id).join(OrderItems, OrderItems.order == Orders.id)\
@@ -87,8 +89,9 @@ class evolutions:
                 return 'todo'
 
         def getTOP10states(annee):
+
             # Si pas d'années séléctionné
-            if annee == None:
+            if annee == None or annee == 'undefined':
                 datas = session.query(Customers.state, func.sum(OrderItems.price * OrderItems.qty).label('brl'))\
                     .join(Orders, Orders.customer == Customers.id)\
                     .join(OrderItems, OrderItems.order == Orders.id)\
@@ -105,7 +108,7 @@ class evolutions:
                     .order_by('test')
                 return datas
 
-            elif annee == None:
+            elif annee == None or annee == 'undefined':
                 datas = session.query(Customers.state, func.date_trunc('month', Orders.approved_at).label("test"), func.sum(OrderItems.price * OrderItems.qty))\
                     .join(Orders, Orders.customer == Customers.id)\
                     .join(OrderItems, OrderItems.order == Orders.id)\
@@ -146,7 +149,7 @@ class evolutions:
 
         dicoDatas['EvolutionsVolume'] = chartJSFormater(
             getEvolutionsVolume(region, annee))
-
+        
         return dicoDatas
 
 

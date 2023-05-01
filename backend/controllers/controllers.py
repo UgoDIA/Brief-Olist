@@ -101,7 +101,7 @@ class evolutions:
                 return 'todo'
 
         def getEvolutionsCA(region, annee):
-            if region == None and annee == None:
+            if region == None and annee == 'undefined':
                 datas = session.query(func.date_trunc('month', Orders.approved_at).label("test"), func.sum(OrderItems.price * OrderItems.qty))\
                     .join(OrderItems, OrderItems.order == Orders.id)\
                     .group_by("test")\
@@ -120,7 +120,7 @@ class evolutions:
                 return 'todo'
 
         def getEvolutionsVolume(region, annee):
-            if region == None and annee == None:
+            if region == None and annee == 'undefined':
                 datas = session.query(func.date_trunc('month', Orders.approved_at).label("month"), func.count(Orders.id))\
                     .group_by("month")\
                     .order_by('month')
